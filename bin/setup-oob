@@ -1,0 +1,137 @@
+#!/opt/chef/embedded/bin/ruby
+# vim: syntax=ruby:expandtab:shiftwidth=2:softtabstop=2:tabstop=2
+
+# Copyright 2021-present Vicarious
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#     http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+# Helpful hints for figuring things out on the SMC:
+#
+# Run the SMCIPMITool in shell mode, then you can turn on copious debugging:
+#
+#   ./SMCIPMITool $host $user $pass shell
+#
+# Once you're in the shell you can do 'debug 1' to dump all IPMI traffic
+# for any command you run (there's also 2 and 3 for more)
+#
+# Then you can test things with:
+#   ipmitool -H $host -U $user -p $pass raw 0xYY 0xZZ ...
+#
+# In almost all cases the netfn is 0x30.
+
+require 'logger'
+require 'optparse'
+require_relative '../lib/setup_oob/oob'
+require_relative '../lib/setup_oob/version'
+
+options = {
+  :level => Logger::INFO,
+  :host => 'localhost',
+}
+OptionParser.new do |opts|
+  opts.on(
+    '-l', '--log-level LEVEL', String, 'Logging level. Defaults to "info"'
+  ) do |l|
+    options[:level] = l
+  end
+
+  opts.on('-c', '--check', 'Check current settings') do
+    options[:check] = true
+  end
+
+  opts.on('-h', '--help') do
+    puts opts
+    exit
+  end
+
+  opts.on(
+    '-H', '--host HOST', String,
+    'Host to operate on. If the host is "localhost", then local IPMI is ' +
+    'used and no authentication is needed (which is great for setting the ' +
+    'right password no matter what it currently is. (default: localhost)'
+  ) do |h|
+    unless h == 'localhost' || h.end_with?('-oob') || h.include?('.')
+      h << '-oob'
+    end
+    options[:host] = h
+  end
+
+  opts.on(
+    '-k', '--key-file FILE', String,
+    'A file containing a secret key used to generate licenses. Do not use ' +
+    'unless you have already purchased licenses!'
+  ) do |k|
+    options[:key] = File.read(k)
+  end
+
+  opts.on(
+    '-n', '--name NAME', String,
+    'Desired name for the OOB. You probably do NOT want to use this ' +
+    'option. By default it is automatically generated for you. If ' +
+    'operating on "localhost", then the host\'s hostname is determined ' +
+    'and "-oob" is appended to the end. If operating on a remote host, then ' +
+    '"-oob" is appended to whatever was passed into -H'
+  ) do |name|
+    options[:desired_hn] = name
+  end
+
+  opts.on(
+    '--network-mode MODE', ['dedicated', 'shared', 'failover'],
+    'Desired network mode.'
+  ) do |mode|
+    options[:network_mode] = mode
+  end
+
+  opts.on(
+    '--network-src MODE', String, 'Desired network src.'
+  ) do |src|
+    options[:network_src] = src
+  end
+
+  opts.on(
+    '-o', '--old-password PASSWORD', String,
+    'The password to use to authenticate. If using in local mode, this is ' +
+    'ignored. If needed, but not specified, the "-p" password will be tried ' +
+    'and then the default password.'
+  ) do |pass|
+    options[:old_password] = pass
+  end
+
+  opts.on(
+    '-p', '--password PASSWORD', String,
+    'The desired password for the ADMIN user.'
+  ) do |pass|
+    options[:password] = pass
+  end
+
+  opts.on('-t', '--type TYPE', String, 'The type of OOB (drac or smc)') do |t|
+    options[:type] = t
+  end
+
+  opts.on('--version') do
+    puts SetupOOB::VERSION
+    exit
+  end
+end.parse!
+
+unless options[:type]
+  fail 'must specify type'
+end
+
+puts "Configuring #{options[:host]}"
+ipmi = OOB.new(options)
+if options[:check]
+  exit(ipmi.converged? ? 0 : 1)
+else
+  ipmi.converge!
+end
