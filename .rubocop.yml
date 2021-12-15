@@ -1,0 +1,215 @@
+AllCops:
+  # this version is based on the current requirements of FB cookbooks,
+  # even though we are on a later version of Ruby
+  TargetRubyVersion: 2.5
+  NewCops: enable
+
+# Disabled rules
+#
+
+Style/Encoding:
+  Enabled: false
+
+Style/NumericLiterals:
+  Enabled: false
+
+Style/MultilineTernaryOperator:
+  Enabled: false
+
+Metrics/ModuleLength:
+  Enabled: false
+
+Metrics/MethodLength:
+  Enabled: false
+
+Metrics/ClassLength:
+  Enabled: false
+
+Style/FormatStringToken:
+  Enabled: false
+
+# It would forbid action [:enable, :start]
+Style/SymbolArray:
+  Enabled: false
+
+# This recommends using external gems to parse heredocs
+Layout/HeredocIndentation:
+  Enabled: false
+
+Metrics/CyclomaticComplexity:
+  Enabled: false
+
+# So just keep iterating instead of breaking? wtf.
+Style/Next:
+  Enabled: false
+
+# While this can be nice, it also can promote errors. Let people
+# use what's comfortable for them
+Style/GuardClause:
+  Enabled: false
+
+Metrics/AbcSize:
+  Enabled: false
+
+# less readable, not more
+Style/IfUnlessModifier:
+  Enabled: false
+
+# Really?
+Style/PerlBackrefs:
+  Enabled: false
+
+# Unrealistic
+Metrics/BlockNesting:
+  Enabled: false
+
+Style/WordArray:
+  Enabled: false
+
+Style/RedundantReturn:
+  Enabled: false
+
+Style/RedundantSelf:
+  Enabled: false
+
+Style/CommentAnnotation:
+  Enabled: false
+
+# this trips on *any* method called 'get_*' wtf.
+Naming/AccessorMethodName:
+  Enabled: false
+
+# backslash is extra dumb in ruby, we want the OPPOSITE of this rule
+Style/LineEndConcatenation:
+  Enabled: false
+
+# We generally do interpolation, but prefer concat for line-breaks
+Style/StringConcatenation:
+  Enabled: false
+
+# This blows up on things like base_packages-redhat
+Naming/FileName:
+  Enabled: false
+
+# I don't know what it's metric for "human complexity" is, but it's wrong.
+Metrics/PerceivedComplexity:
+  Enabled: false
+
+# https://github.com/bbatsov/rubocop/issues/2676
+# but not yet in our version of RC
+#Performance/RedundantMerge:
+#  Enabled: false
+
+# Bug with constants? https://phabricator.fb.com/P56108678
+Style/ConditionalAssignment:
+  Enabled: false
+
+# Heredocs are fine with "EOF"
+Naming/HeredocDelimiterNaming:
+  Enabled: false
+
+# This double-reports what happens in EmptyLines
+Layout/EmptyLineBetweenDefs:
+  Enabled: false      
+
+Naming/MethodParameterName:
+  Enabled: false
+
+# this removes disablign for cops whose names have changed, but
+# that breaks lint for upstream and for Jenkins
+Lint/RedundantCopDisableDirective:
+  Enabled: false
+
+Style/NumericLiteralPrefix:
+  Enabled: false
+
+Naming/VariableNumber:
+  Enabled: false
+
+# no, we're not putting parens around `lazy`
+Lint/AmbiguousBlockAssociation:
+  Enabled: false
+
+# this is misfiring in multiple cookbooks
+Layout/EmptyLinesAroundArguments:
+  Enabled: false
+
+
+#
+# Modified rules
+#
+Layout/LineLength:
+  Enabled: true
+  Max: 80
+
+Layout/DotPosition:
+  Enabled: true
+  EnforcedStyle: trailing
+
+Style/HashSyntax:
+  Enabled: true
+  EnforcedStyle: hash_rockets
+
+Style/Documentation:
+  Enabled: false
+
+Style/TrailingCommaInArrayLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInHashLiteral:
+  Enabled: true
+  EnforcedStyleForMultiline: comma
+
+Style/TrailingCommaInArguments:
+  Enabled: true
+  EnforcedStyleForMultiline: comma
+
+Layout/FirstArrayElementIndentation:
+  Enabled: true
+  EnforcedStyle: consistent
+
+Style/SignalException:
+  Enabled: true
+  EnforcedStyle: semantic
+
+Style/RegexpLiteral:
+  EnforcedStyle: mixed
+
+Metrics/BlockLength:
+  Enabled: false
+
+Style/PercentLiteralDelimiters:
+  PreferredDelimiters:
+    default: '{}'
+    '%i': '{}'
+    '%I': '{}'
+    '%w': '{}'
+    '%W': '{}'
+    '%r': '{}'
+    '%': '{}'
+
+# this is supposedly the default, but turns not not really
+# https://github.com/bbatsov/rubocop/issues/5277
+Layout/SpaceBeforeBlockBraces:
+  EnforcedStyleForEmptyBraces: space
+
+# EnforcedStyle is what we want, but enablign this now will cause
+# a ton of churn with upstream cookbooks
+Layout/MultilineOperationIndentation:
+  Enabled: false
+  EnforcedStyle: indented
+
+Style/NumericPredicate:
+  Enabled: false
+
+Style/FrozenStringLiteralComment:
+  EnforcedStyle: never
+
+# need fb cookbooks to catch up to modern ruby a bit first
+Style/OptionalBooleanParameter:
+  Enabled: false
+
+# Chef does this by design all over
+Lint/ConstantDefinitionInBlock:
+  Enabled: false
