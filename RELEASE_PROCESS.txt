@@ -2,8 +2,7 @@ To make a release you should
 
 On your checkout:
 * Update the version number and changelog, commit locally, push
-    vi CHANGELOG.md
-    vi setup_oob.gemspec
+    vi CHANGELOG.md lib/setup_oob/version.rb
     # create a pull request and merge it
 
 * Add and push a tag:
