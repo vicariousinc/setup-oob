@@ -31,4 +31,7 @@ Gem::Specification.new do |s|
   s.files = %w{README.md LICENSE} +
     Dir.glob('{lib}/**/*', File::FNM_DOTMATCH).
             reject { |f| File.directory?(f) }
+
+  s.add_dependency 'ipaddress'
+  s.add_dependency 'mixlib-shellout'
 end
